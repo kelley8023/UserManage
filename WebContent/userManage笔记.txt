@@ -1,0 +1,150 @@
+
+$("#id").val();
+$("#errorMsg").html("错误信息");
+web交互：
+
+技术：mysql + jsp + servlet + javaBean + jdbc
+1.页面展示的内容  ui   （register.jsp）
+  	确定类及类的属性   
+  	数据库表，字段
+2.接口定义  -》 与前端交互的接口 （后端） (register)
+3.接口实现   (servlet)
+    功能实现
+    1） 外接jar包（jdbc链接需要的jar等 ）
+    2） 接收前端传过来的值
+    接收的参数值 与 前端一定要一致  
+    （接收的值：request.getParameter("username") 
+      前端定义：username    ：一般定义都是在标签的name属性中定义）    
+    3）对数据校验 （正则）
+    4）数据封装后，与数据库交互   (c->create r->read  u->update d->delete)
+       a)插入，更新，删除方式
+         create/add 
+         数据库交互：
+         1. 创建与数据库连接
+            Class.forName("com.mysql.jdbc.Driver");
+			Connection con = DriverManager.getConnection("项目要链接的数据库名","数据库用户名","数据库密码");
+            
+          2.  预处理的方式sql定义 （防止sql注入）
+            不建议：“select id,name,pwd form 表 where name = ”+name+" and pwd ="+pwd;
+            “select id,name,pwd form 表 where name = ？and pwd =?";
+            预处理类：PreparedStatement
+     
+          3.  给占位符设置值（下标从1开始）：（占位符位置下标，占位符的值）
+            pstmt.setString(1, userInfo.getUserName())
+            
+            set方法要根据你放的值来确定
+            String类型setString
+            int 类型 setInt
+            。。。。
+            
+          4. 与数据库交互时api接口： executeUpdate()
+            
+       b)查询方式 (大多都是列表)
+          findAllByUsername
+         
+          与数据库交互时api接口:  executeQuery()
+                  
+    5）页面跳转
+       交互成功：下一业务页面展示
+       没成功：当前页面
+ 
+    最终的目的： 接口相关所有的封装
+    
+    前端往后端传值：变量名是在标签的name定义
+      后端获取前端的值：request.getP***（“变量名”）
+    
+    后端往前端传值：
+      后端设值：
+      1)request.setAttribute("message", "账号密码不正确");
+      2) request.setAt tribute("peopleList", userList);
+      前端获取后端的值：
+      1) ${requestScope.message}  // ${requestScope.peopleList} 
+      2) ${message}  // ${peopleList}     
+ 
+      
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>   
+ <%
+   String uname = request.getParameter("username");
+ %>
+   <c:set value="${username}" var="uname"></c:set>
+    
+    <%
+		  List userList = new ArrayList();
+		  userList.add(1);
+		  userList.add(2);
+		  userList.add(3);
+		 /*  for(int i = 0;i<userList.size();i++){
+			  
+		  } */
+		  
+		  //2019-12-01 12:10:23
+	%>
+		页面取值：
+		1）<%=userList %>
+		2） ${userList}
+		
+		<c:import url="login.jsp"></c:import>			
+			<%-- 	
+			<fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" 
+                 value="${now}" /> 
+             --%> 
+	     <c:out value="${ userList}"></c:out>
+    
+    String sql =  
+    """
+      select  id
+             ,username
+             ,password
+             ,sex
+             ,birthplace
+      from people
+      left join *** on ;
+              
+    """
+    
+    按表的字段顺序插值：
+    insert into people  values('','','');
+    
+    insert into people (col1,col2...) values('','','');
+    
+    update 表名 set col1 = 值 ,col2=值 【where col3 =? and col4=?】
+    
+    删除表数据，不删除表
+    delete from table [where col =?]  
+    
+    删除表
+    drop table;
+     
+    where col is not null 
+    where id in (2,10,100);
+    between 10 and 100
+    
+    mysql 数据库分页：
+    
+    offset:返回的第一行的偏移量。第一行的偏移量为0，而不是1。
+    max: 返回的最大行数
+    
+    order by col,col2
+    limit offset ,max
+    
+    CREATE TABLE `book` (
+      `id` int(100) NOT NULL AUTO_INCREMENT,
+      `bookname` varchar(50) NOT NULL,
+      `price` double(20,0) NOT NULL,
+      `decription` varchar(100) DEFAULT NULL,
+      `peopleId` int(100) NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `peopleId` (`peopleId`),
+    CONSTRAINT `book_ibfk_1` FOREIGN KEY (`peopleId`) REFERENCES `people` (`id`)
+   ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+    
+    
+    select bookname,price from book b
+	left join people p on p.id =  b.peopleId
+	where p.username= 'lisi';
+
+	select bookname,price from book where peopleId=5;
+    
+    
+    
